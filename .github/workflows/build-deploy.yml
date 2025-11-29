@@ -1,0 +1,63 @@
+name: Build and Deploy JPNV Sports Website
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'data/**'
+      - 'config/**'
+      - 'images/**'
+  workflow_dispatch:
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Clone MCP Server
+      run: |
+        git clone https://github.com/pmkhairnarr/spreadsheet-website-builder-mcp.git mcp-server
+        cd mcp-server
+        npm install
+        
+    - name: Build Sports Website
+      run: |
+        cd mcp-server
+        node -e "
+        import SpreadsheetDataReader from './src/SpreadsheetDataReader.js';
+        import WebsiteGenerator from './src/WebsiteGenerator.js';
+        
+        const reader = new SpreadsheetDataReader();
+        const generator = new WebsiteGenerator('./website-output');
+        
+        // Try Excel file first, then CSV files
+        let data;
+        if (require('fs').existsSync('../data/jpnv-sports-data.xlsx')) {
+          data = await reader.readSpreadsheet('../data/jpnv-sports-data.xlsx');
+        } else {
+          // Build from CSV files
+          console.log('Building from CSV files');
+          // Implementation for CSV aggregation
+        }
+        
+        await generator.generateWebsite(data, {
+          title: 'JPNV Sports 2025-26 - Excellence in Sports',
+          theme: 'sports',
+          description: 'JPNV Sports management website with schedules, results, and player information'
+        });
+        "
+        
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./mcp-server/website-output
+        publish_branch: gh-pages
