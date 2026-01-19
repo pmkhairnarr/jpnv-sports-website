@@ -1,0 +1,10 @@
+{
+  "name": "JPNV Sports 2025-26",
+  "short_name": "JPNV Sports 2025-26",
+  "description": "Generated from Time Table Sport day 2025-2026.xlsx",
+  "start_url": "./",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "icons": []
+}
